@@ -215,7 +215,7 @@ function showWinPopup() {
 
 // Fireworks bursts synced with sound
 function fireworksWithSound() {
-    const bursts = 25;      // number of fireworks
+    const bursts = 10;      // number of fireworks
     const interval = 500;  // ms between bursts
 
     let count = 0;
@@ -293,3 +293,4 @@ setInterval(() => {
     }
 
 }, 1000);
+
