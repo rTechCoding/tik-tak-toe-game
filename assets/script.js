@@ -1,317 +1,251 @@
-
+// Tic Tac Toe logic with AI, difficulty, click sound, win fireworks
 let board = Array(9).fill(null);
 let isXNext = true;
 let winner = null;
 let mode = null;
 let difficulty = null;
-let scores = { X: 0, O: 0, draws: 0 };
+let scores = {X:0,O:0,draws:0};
 let playerXName = "Player X";
 let playerOName = "Player O";
 
-function selectMode(m) {
-    mode = m;
-    modeScreen.classList.add('hidden');
-    playerNamePopup.classList.remove('hidden');
-    playerXInput.value = "";
-    playerOInput.value = "";
+const boardEl = document.getElementById("board");
+const clickSound = document.getElementById("clickSound");
+const winSound = document.getElementById("winSound");
+const drawSound = document.getElementById("drawSound"); // draw sound (can be changed)
+const fireworksSound = document.getElementById("fireworksSound"); // short fireworks burst
 
-    if (m === 'vsComputer') {
-        popupTitle.textContent = "Enter Your Name";
-        playerOInput.classList.add('hidden');
-    } else {
-        popupTitle.textContent = "Enter Player Names";
-        playerOInput.classList.remove('hidden');
-    }
+function selectMode(m){
+    mode=m;
+    document.getElementById('modeScreen').classList.add('hidden');
+    document.getElementById('playerNamePopup').classList.remove('hidden');
+    document.getElementById('playerXInput').value="";
+    document.getElementById('playerOInput').value="";
+    document.getElementById('popupTitle').textContent = m==='vsComputer' ? "Enter Your Name" : "Enter Player Names";
+    if(m==='vsComputer') document.getElementById('playerOInput').classList.add('hidden');
+    else document.getElementById('playerOInput').classList.remove('hidden');
 }
 
-function confirmNames() {
-    let valid = true;
-
-    const xInput = document.getElementById('playerXInput');
-    const oInput = document.getElementById('playerOInput');
-
-    const errorX = document.getElementById('errorX');
-    const errorO = document.getElementById('errorO');
-
-    // Reset
-    errorX.style.display = 'none';
-    errorO.style.display = 'none';
-    xInput.style.border = '';
-    oInput.style.border = '';
-
-    // Validate Player X
-    if (xInput.value.trim() === '') {
-        errorX.style.display = 'block';
-        xInput.style.border = '2px solid red';
-        valid = false;
-    }
-
-    // Validate Player O (only in 2 player mode)
-    if (mode === '2player' && oInput.value.trim() === '') {
-        errorO.style.display = 'block';
-        oInput.style.border = '2px solid red';
-        valid = false;
-    }
-
-    if (!valid) return;
-
-    // Assign names
-    playerXName = xInput.value.trim();
-    playerOName = mode === 'vsComputer'
-        ? 'Computer'
-        : oInput.value.trim();
-
+function confirmNames(){
+    let x=document.getElementById('playerXInput').value.trim();
+    let o=document.getElementById('playerOInput').value.trim();
+    if(!x){document.getElementById('errorX').style.display='block';return;}
+    if(mode==='2player' && !o){document.getElementById('errorO').style.display='block';return;}
+    playerXName=x;
+    playerOName=mode==='vsComputer'?'Computer':o;
     document.getElementById('playerNamePopup').classList.add('hidden');
-
-    document.getElementById('playerXLabel').textContent = playerXName;
-    document.getElementById('playerOLabel').textContent = playerOName;
-
-    if (mode === 'vsComputer') {
-        document.getElementById('difficultyScreen').classList.remove('hidden');
-    } else {
-        startGame();
-    }
+    document.getElementById('playerXLabel').textContent=playerXName;
+    document.getElementById('playerOLabel').textContent=playerOName;
+    if(mode==='vsComputer') document.getElementById('difficultyScreen').classList.remove('hidden');
+    else startGame();
 }
 
-
-function selectDifficulty(selectedDifficulty) {
-    difficulty = selectedDifficulty;
+function selectDifficulty(d){
+    difficulty=d;
     document.getElementById('difficultyScreen').classList.add('hidden');
-    document.getElementById('playerOLabel').textContent = 'Computer';
     startGame();
 }
 
-function backToMode() {
+function backToMode(){
     document.getElementById('difficultyScreen').classList.add('hidden');
     document.getElementById('modeScreen').classList.remove('hidden');
 }
 
-function startGame() {
+function backFromNamePopup(){
+    document.getElementById('playerNamePopup').classList.add('hidden');
+    document.getElementById('playerXInput').value="";
+    document.getElementById('playerOInput').value="";
+    document.getElementById('errorX').style.display='none';
+    document.getElementById('errorO').style.display='none';
+    document.getElementById('modeScreen').classList.remove('hidden');
+    mode=null;
+}
+
+function startGame(){
+    board=Array(9).fill(null);
+    isXNext=true;
+    winner=null;
     document.getElementById('gameScreen').classList.remove('hidden');
     renderBoard();
     updateStatus();
 }
 
-function renderBoard() {
-    const boardEl = document.getElementById('board');
-    boardEl.innerHTML = '';
-
-    for (let i = 0; i < 9; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        if (board[i]) {
-            cell.textContent = board[i];
-            cell.classList.add('filled', board[i].toLowerCase());
-        }
-        cell.onclick = () => handleClick(i);
-        boardEl.appendChild(cell);
-    }
-
-    if (winner && winner.line) {
-        winner.line.forEach(idx => {
-            boardEl.children[idx].classList.add('winning');
-        });
+function renderBoard(){
+    boardEl.innerHTML='';
+    board.forEach((v,i)=>{
+        const c=document.createElement('div');
+        c.className='cell'+(v?' '+v.toLowerCase():'');
+        c.textContent=v||'';
+        c.onclick=()=>handleClick(i);
+        boardEl.appendChild(c);
+    });
+    if(winner && winner.line){
+        winner.line.forEach(idx=>boardEl.children[idx].classList.add('winning'));
     }
 }
 
-function handleClick(index) {
-    if (board[index] || winner) return;
-
-    board[index] = isXNext ? 'X' : 'O';
+function handleClick(i){
+    if(board[i]||winner) return;
+    clickSound.play().catch(()=>{});
+    board[i]=isXNext?'X':'O';
     checkWinner();
-    isXNext = !isXNext;
+    isXNext=!isXNext;
     renderBoard();
     updateStatus();
-
-    if (mode === 'vsComputer' && !isXNext && !winner) {
-        setTimeout(makeComputerMove, 500);
-    }
+    if(mode==='vsComputer' && !isXNext && !winner) setTimeout(makeComputerMove,500);
 }
 
-function makeComputerMove() {
-    const emptySquares = board.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
-
-    if (emptySquares.length === 0) return;
-
-    let moveIndex;
-
-    // Easy: 70% random
-    if (difficulty === 'easy' && Math.random() < 0.7) {
-        moveIndex = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+function makeComputerMove(){
+    const empty=board.map((v,i)=>v===null?i:null).filter(v=>v!==null);
+    if(empty.length===0) return;
+    let move;
+    if(difficulty==='easy' && Math.random()<0.7){
+        move=empty[Math.floor(Math.random()*empty.length)];
+    }else if(difficulty==='medium' && Math.random()<0.4){
+        move=empty[Math.floor(Math.random()*empty.length)];
+    }else{
+        move=findBestMove(empty);
     }
-    // Medium: 40% random
-    else if (difficulty === 'medium' && Math.random() < 0.4) {
-        moveIndex = emptySquares[Math.floor(Math.random() * emptySquares.length)];
-    }
-    // Smart move
-    else {
-        moveIndex = findBestMove(emptySquares);
-    }
-
-    handleClick(moveIndex);
+    handleClick(move);
 }
 
-function findBestMove(emptySquares) {
-    // Try to win
-    for (let idx of emptySquares) {
-        const testBoard = [...board];
-        testBoard[idx] = 'O';
-        if (checkWinnerForBoard(testBoard) === 'O') {
-            return idx;
-        }
+function findBestMove(empty){
+    for(let idx of empty){
+        let t=[...board];t[idx]='O';
+        if(checkWinnerForBoard(t)==='O') return idx;
     }
-
-    // Block player
-    for (let idx of emptySquares) {
-        const testBoard = [...board];
-        testBoard[idx] = 'X';
-        if (checkWinnerForBoard(testBoard) === 'X') {
-            return idx;
-        }
+    for(let idx of empty){
+        let t=[...board];t[idx]='X';
+        if(checkWinnerForBoard(t)==='X') return idx;
     }
-
-    // Take center
-    if (board[4] === null) return 4;
-
-    // Take corner
-    const corners = [0, 2, 6, 8].filter(idx => board[idx] === null);
-    if (corners.length > 0) {
-        return corners[Math.floor(Math.random() * corners.length)];
-    }
-
-    // Take any
-    return emptySquares[Math.floor(Math.random() * emptySquares.length)];
+    if(board[4]===null) return 4;
+    const corners=[0,2,6,8].filter(i=>board[i]===null);
+    if(corners.length>0) return corners[Math.floor(Math.random()*corners.length)];
+    return empty[Math.floor(Math.random()*empty.length)];
 }
 
-function checkWinner() {
-    const result = checkWinnerForBoard(board);
-    if (result) {
-        if (result === 'draw') {
-            winner = { winner: 'draw', line: null };
-            scores.draws++;
-        } else {
-            const lines = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8],
-                [0, 3, 6], [1, 4, 7], [2, 5, 8],
-                [0, 4, 8], [2, 4, 6]
-            ];
-
-            for (let line of lines) {
-                const [a, b, c] = line;
-                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                    winner = { winner: board[a], line: line };
-                    if (result === 'X') scores.X++;
-                    else scores.O++;
+function checkWinner(){
+    const result=checkWinnerForBoard(board);
+    if(result){
+        if(result==='draw'){winner={winner:'draw',line:null};scores.draws++;}
+        else{
+            const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            for(let line of lines){
+                const [a,b,c]=line;
+                if(board[a]&&board[a]===board[b]&&board[a]===board[c]){
+                    winner={winner:board[a],line:line};
+                    if(result==='X') scores.X++; else scores.O++;
                     break;
                 }
             }
         }
         updateScores();
+        showWinPopup();
     }
 }
 
-function checkWinnerForBoard(squares) {
-    const lines = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8],
-        [0, 3, 6], [1, 4, 7], [2, 5, 8],
-        [0, 4, 8], [2, 4, 6]
-    ];
-
-    for (let line of lines) {
-        const [a, b, c] = line;
-        if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-            return squares[a];
-        }
-    }
-
-    if (squares.every(square => square !== null)) {
-        return 'draw';
-    }
-
+function checkWinnerForBoard(s){
+    const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for(let [a,b,c] of lines){if(s[a]&&s[a]===s[b]&&s[a]===s[c]) return s[a];}
+    if(s.every(Boolean)) return 'draw';
     return null;
 }
 
-function updateStatus() {
-    const statusEl = document.getElementById('status');
-
-    if (winner) {
-        if (winner.winner === 'draw') {
-            statusEl.textContent = "It's a Draw! 🤝";
-            statusEl.style.color = '#6b7280';
-        } else {
-            const winnerName =
-                winner.winner === 'X'
-                    ? playerXName
-                    : (mode === 'vsComputer' ? 'Computer' : playerOName);
-
-            statusEl.textContent = `${winnerName} Wins! 🎉`;
-            statusEl.style.color = winner.winner === 'X' ? '#2563eb' : '#dc2626';
-        }
-    } else {
-        const currentPlayer = isXNext
-            ? `${playerXName} Turn`
-            : (mode === 'vsComputer' ? "Computer Turn" : `${playerOName} Turn`);
-
-        statusEl.textContent = currentPlayer;
-        statusEl.style.color = isXNext ? '#2563eb' : '#dc2626';
+function updateStatus(){
+    const status=document.getElementById('status');
+    if(winner){
+        if(winner.winner==='draw') status.textContent="It's a Draw! 🤝";
+        else status.textContent=`${winner.winner==='X'?playerXName:playerOName} Wins! 🎉`;
+    }else{
+        status.textContent=isXNext?`${playerXName} Turn`:`${mode==='vsComputer'?"Computer":playerOName} Turn`;
     }
 }
 
-
-function updateScores() {
-    document.getElementById('scoreX').textContent = scores.X;
-    document.getElementById('scoreO').textContent = scores.O;
-    document.getElementById('scoreDraws').textContent = scores.draws;
+function updateScores(){
+    document.getElementById('scoreX').textContent=scores.X;
+    document.getElementById('scoreO').textContent=scores.O;
+    document.getElementById('scoreDraws').textContent=scores.draws;
 }
 
-function resetGame() {
-    board = Array(9).fill(null);
-    isXNext = true;
-    winner = null;
+function resetGame(){
+    board=Array(9).fill(null);
+    isXNext=true;
+    winner=null;
     renderBoard();
     updateStatus();
 }
 
-function changeMode() {
-    board = Array(9).fill(null);
-    isXNext = true;
-    winner = null;
-    mode = null;
-    difficulty = null;
-    scores = { X: 0, O: 0, draws: 0 };
-
+function changeMode(){
+    board=Array(9).fill(null);
+    isXNext=true;
+    winner=null;
+    mode=null;
+    difficulty=null;
+    scores={X:0,O:0,draws:0};
     document.getElementById('gameScreen').classList.add('hidden');
     document.getElementById('modeScreen').classList.remove('hidden');
     updateScores();
 }
 
-// back button name
-function backFromNamePopup() {
-    // Hide name popup
-    document.getElementById('playerNamePopup').classList.add('hidden');
+// WIN POPUP + FIREWORKS
+// function showWinPopup(){
+//     winSound.play().catch(()=>{});
+//     document.getElementById('winMessage').textContent=
+//         winner.winner==='draw'?"It's a Draw! 🤝":`${winner.winner==='X'?playerXName:playerOName} Wins! 🎉`;
+//     document.getElementById('winPopup').classList.remove('hidden');
+//     fireworks();
+// }
+// Sounds
 
-    // Clear input fields & errors
-    document.getElementById('playerXInput').value = '';
-    document.getElementById('playerOInput').value = '';
 
-    const errorX = document.getElementById('errorX');
-    const errorO = document.getElementById('errorO');
+function showWinPopup() {
+    const winPopup = document.getElementById('winPopup');
+    const winMessage = document.getElementById('winMessage');
 
-    if (errorX) errorX.style.display = 'none';
-    if (errorO) errorO.style.display = 'none';
+    if (winner.winner === 'draw') {
+        winMessage.textContent = "It's a Draw! 🤝";
+        drawSound.play().catch(() => {});
+    } else {
+        winMessage.textContent = `${winner.winner === 'X' ? playerXName : playerOName} Wins! 🎉`;
+        winSound.play().catch(() => {});
+        fireworksWithSound();
+    }
 
-    // Reset input borders
-    document.getElementById('playerXInput').style.border = '';
-    document.getElementById('playerOInput').style.border = '';
+    winPopup.classList.remove('hidden');
+}
 
-    // Go back to mode selection
-    document.getElementById('modeScreen').classList.remove('hidden');
+// Fireworks bursts synced with sound
+function fireworksWithSound() {
+    const bursts = 25;      // number of fireworks
+    const interval = 500;  // ms between bursts
 
-    // Hide difficulty screen if it was opened
-    document.getElementById('difficultyScreen').classList.add('hidden');
+    let count = 0;
+    const burstInterval = setInterval(() => {
+        fireworks(); // visual fireworks
+        fireworksSound.currentTime = 0;
+        fireworksSound.play().catch(() => {});
 
-    // Reset mode selection
-    mode = null;
+        count++;
+        if (count >= bursts) clearInterval(burstInterval);
+    }, interval);
+}
+
+
+function closeWin(){
+    document.getElementById('winPopup').classList.add('hidden');
+    resetGame();
+}
+
+function fireworks(){
+    for(let i=0;i<25;i++){
+        const f=document.createElement('div');
+        f.className='firework';
+        f.style.background=`hsl(${Math.random()*360},100%,60%)`;
+        f.style.left="50%";f.style.top="50%";
+        f.style.setProperty('--x',`${(Math.random()-0.5)*400}px`);
+        f.style.setProperty('--y',`${(Math.random()-0.5)*400}px`);
+        document.body.appendChild(f);
+        // setTimeout(()=>f.remove(),1000);
+    }
 }
 
 
@@ -357,4 +291,5 @@ setInterval(() => {
     ) {
         document.body.innerHTML = "<h2 style='text-align:center;margin-top:20%;'>⚠ Developer Tools Detected</h2>";
     }
+
 }, 1000);
