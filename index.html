@@ -12,90 +12,79 @@
 
     <body>
         <div class="tik_container">
-            <div class="popup-header">
-                <h1>Tic Tac Toe Game</h1>
+    <div class="popup-header"><h1>Tic Tac Toe Game</h1></div>
+    <div class="tik_card">
 
-            </div>
-            <div class="tik_card">
-
-                <p class="instruction-text">Choose how you want to play</p>
-                <!-- Mode Selection Screen -->
-                <div id="modeScreen">
-                    <div class="mode-selection">
-                        <button class="mode-btn" onclick="selectMode('2player')">
-                            👥<br>2 Players
-                        </button>
-                        <button class="mode-btn" onclick="selectMode('vsComputer')">
-                            🤖<br>vs Computer
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Difficulty Selection Screen -->
-                <div id="difficultyScreen" class="hidden">
-                    <h2 style="color: white; margin-bottom: 20px;">Choose Difficulty</h2>
-                    <div class="difficulty-selection">
-                        <button class="difficulty-btn easy" onclick="selectDifficulty('easy')">
-                            😊 Easy
-                        </button>
-                        <button class="difficulty-btn medium" onclick="selectDifficulty('medium')">
-                            😐 Medium
-                        </button>
-                        <button class="difficulty-btn hard" onclick="selectDifficulty('hard')">
-                            😈 Hard
-                        </button>
-                    </div>
-                    <button class="btn secondary back-btn" onclick="backToMode()">Back</button>
-                </div>
-
-                <!-- Game Screen -->
-                <div id="gameScreen" class="hidden tik_flex">
-                    <div class="scoreboard">
-                        <div class="scores">
-                            <div>❌ <span id="playerXLabel">Player X</span>: <span id="scoreX">0</span></div>
-                            <div>⭕ <span id="playerOLabel">Player O</span>: <span id="scoreO">0</span></div>
-                            <div>🤝 Draws: <span id="scoreDraws">0</span></div>
-                        </div>
-                    </div>
-
-                    <div class="status" id="status">Player X's Turn</div>
-
-                    <div class="board" id="board"></div>
-
-                    <div class="controls">
-                        <button class="btn primary" onclick="resetGame()">🔄 New Game</button>
-                        <button class="btn secondary" onclick="changeMode()">Change Mode</button>
-                    </div>
-                </div>
-
-            </div>
-            <footer class="footer">
-                © 2025 Tic Tac Toe — Built with ❤️ By <a href="https://in.linkedin.com/in/rahat-ansari-52409b223"
-                    class="font-weight-bold" target="_blank">Rahat
-                    Ansari</a> for fun
-            </footer>
+        <p class="instruction-text">Choose how you want to play</p>
+        <div id="modeScreen">
+            <button class="mode-btn" onclick="selectMode('2player')">👥<br>2 Players</button>
+            <button class="mode-btn" onclick="selectMode('vsComputer')">🤖<br>vs Computer</button>
         </div>
 
-        <!-- NAME POPUP -->
-        <div id="playerNamePopup" class="hidden">
+        <div id="difficultyScreen" class="hidden">
+            <h2 style="color:white;margin-bottom:20px;">Choose Difficulty</h2>
+            <div class="difficulty-selection">
+                <button class="difficulty-btn easy" onclick="selectDifficulty('easy')">😊 Easy</button>
+                <button class="difficulty-btn medium" onclick="selectDifficulty('medium')">😐 Medium</button>
+                <button class="difficulty-btn hard" onclick="selectDifficulty('hard')">😈 Hard</button>
+            </div>
+            <button class="btn secondary back-btn" onclick="backToMode()">Back</button>
+        </div>
 
-            <div class="popup-box">
-                <h3 id="popupTitle" style="margin-bottom: 10px;">Enter Player Names</h3>
-
-                <input id="playerXInput" placeholder="Player X Name">
-                <small id="errorX" style="color:red;display:none">Enter Player X Name</small>
-
-                <input id="playerOInput" placeholder="Player O Name">
-                <small id="errorO" style="color:red;display:none">Enter Player O Name</small>
-
-                <button class="btn secondary back-btn" onclick="backFromNamePopup()">Back</button>
-                <button class="btn primary m-t-15" onclick="confirmNames()">Start Game</button>
+        <div id="gameScreen" class="hidden tik_flex">
+            <div class="scoreboard">
+                <div class="scores">
+                    <div>❌ <span id="playerXLabel">Player X</span>: <span id="scoreX">0</span></div>
+                    <div>⭕ <span id="playerOLabel">Player O</span>: <span id="scoreO">0</span></div>
+                    <div>🤝 Draws: <span id="scoreDraws">0</span></div>
+                </div>
             </div>
 
+            <div class="status" id="status">Player X's Turn</div>
+            <div class="board" id="board"></div>
+
+            <div class="controls">
+                <button class="btn primary" onclick="resetGame()">🔄 New Game</button>
+                <button class="btn secondary" onclick="changeMode()">Change Mode</button>
+            </div>
         </div>
+    </div>
+
+    <footer class="footer">
+        © 2025 Tic Tac Toe — Built with ❤️ By <a href="https://in.linkedin.com/in/rahat-ansari-52409b223" target="_blank">Rahat Ansari</a> for fun
+    </footer>
+</div>
+
+<!-- PLAYER NAME POPUP -->
+<div id="playerNamePopup" class="hidden">
+    <div class="popup-box">
+        <h3 id="popupTitle">Enter Player Names</h3>
+        <input id="playerXInput" placeholder="Player X Name">
+        <small id="errorX" style="color:red;display:none">Enter Player X Name</small>
+        <input id="playerOInput" placeholder="Player O Name">
+        <small id="errorO" style="color:red;display:none">Enter Player O Name</small>
+        <button class="btn secondary back-btn" onclick="backFromNamePopup()">Back</button>
+        <button class="btn primary m-t-15" onclick="confirmNames()">Start Game</button>
+    </div>
+</div>
+
+<!-- WIN POPUP -->
+<div id="winPopup" class="popup hidden">
+    <div class="popup-win">
+        <h2 id="winMessage"></h2>
+        <button class="btn primary" onclick="closeWin()">OK</button>
+    </div>
+</div>
+
+<audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+<audio id="drawSound" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+<audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/610/610-preview.mp3"></audio>
+<audio id="fireworksSound" src="https://waveform.envatousercontent.com/tsunami/479186249/preview.mp3"></audio>
+
 
        <script src="assets/script.js"></script>
     </body>
 
 
     </html>
+
